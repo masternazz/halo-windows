@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtualenv
+.venv/
+venv/
+
+# PyInstaller (M6)
+build/
+dist/
+*.spec
+
+# Halo runtime scratch
+halo_state.json
+halo_screenshot.*
+*.log
+
+# OS / editor
+Thumbs.db
+.DS_Store
+.idea/
+.vscode/

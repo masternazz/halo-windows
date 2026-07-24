@@ -1,0 +1,12 @@
+{
+  "_comment": "Halo registration for Claude Code. Merge this mcpServers block into ~/.claude.json (top-level), or run the CLI below. IMPORTANT: use the ABSOLUTE path to mcp_server/__main__.py, NOT `-m mcp_server`. The VS Code extension launches MCP servers from the WORKSPACE ROOT, where `-m mcp_server` fails with 'No module named mcp_server'. The absolute script path is cwd-independent and works everywhere. Reload the VS Code window (or start a new chat) after adding.",
+  "_cli": "claude mcp add-json -s user halo '{\"type\":\"stdio\",\"command\":\"H:/vscode/halo/.venv/Scripts/python.exe\",\"args\":[\"H:/vscode/halo/mcp_server/__main__.py\"],\"cwd\":\"H:/vscode/halo\"}'",
+  "mcpServers": {
+    "halo": {
+      "type": "stdio",
+      "command": "H:/vscode/halo/.venv/Scripts/python.exe",
+      "args": ["H:/vscode/halo/mcp_server/__main__.py"],
+      "cwd": "H:/vscode/halo"
+    }
+  }
+}

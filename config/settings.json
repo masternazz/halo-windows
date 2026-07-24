@@ -1,0 +1,29 @@
+{
+  "_comment": "Halo settings. Edit and restart the overlay (and re-run screenshots) to apply. Any subset of keys overrides the baked-in defaults in common.py.",
+
+  "overlay": {
+    "host": "127.0.0.1",
+    "port": 7333
+  },
+
+  "draw": {
+    "radius": 60,
+    "color": "#FF2D2D",
+    "ttl_ms": 8000,
+    "ring_pen_width": 5
+  },
+
+  "screenshot": {
+    "_comment": "Lower max_dim / jpeg_quality = fewer tokens & bytes per screenshot. Raise them if the agent can't resolve small UI. format: \"jpeg\" (small) or \"png\" (lossless).",
+    "max_dim": 1152,
+    "format": "jpeg",
+    "jpeg_quality": 72
+  },
+
+  "hotkeys": {
+    "_comment": "Global Windows hotkeys. modifiers ctrl/alt/shift/win + one key. \"\" disables. clear=wipe marks, toggle=show/hide overlay, quit=exit overlay.",
+    "clear": "ctrl+alt+h",
+    "toggle": "ctrl+alt+j",
+    "quit": ""
+  }
+}

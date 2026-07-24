@@ -1,0 +1,10 @@
+# Halo registration for Codex — merge into ~/.codex/config.toml
+# Use the ABSOLUTE path to mcp_server/__main__.py (not `-m mcp_server`) so it works
+# regardless of the working directory Codex launches it from. Replace paths for your setup.
+
+[mcp_servers.halo]
+command = "H:/vscode/halo/.venv/Scripts/python.exe"
+args = ["H:/vscode/halo/mcp_server/__main__.py"]
+cwd = "H:/vscode/halo"
+
+# After adding, start a NEW Codex session so it loads the halo tools.

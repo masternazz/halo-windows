@@ -1,0 +1,8 @@
+# Halo dependencies (Python 3.11+)
+PySide6>=6.6        # transparent, always-on-top, click-through overlay window
+mss>=9.0            # fast screen capture in physical pixels, multi-monitor aware
+Pillow>=10.0        # image downscaling / PNG encoding for the screenshot handshake
+mcp>=1.2            # official MCP Python SDK (FastMCP) — stdio server for Claude Code + Codex
+
+# Dev / later:
+# pyinstaller>=6.0  # M6: one-file build of the overlay so it runs without a dev env
