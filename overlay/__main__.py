@@ -36,6 +36,26 @@ import common  # noqa: E402
 # Per-Monitor-v2 DPI awareness (also before any Qt object exists).
 common.set_dpi_awareness()
 
+
+def _elog(msg: str) -> None:
+    """Crash-safe diagnostic log. In PyInstaller --windowed builds sys.stderr is None, so a
+    raw sys.stderr.write would raise AttributeError and kill startup. Write to stderr if it
+    exists, and always append to a log file next to the exe/temp so windowed builds are
+    debuggable."""
+    try:
+        if sys.stderr is not None:
+            sys.stderr.write(msg + "\n")
+            sys.stderr.flush()
+    except Exception:
+        pass
+    try:
+        import tempfile
+        with open(os.path.join(tempfile.gettempdir(), "halo-overlay.log"), "a",
+                  encoding="utf-8") as f:
+            f.write(msg + "\n")
+    except Exception:
+        pass
+
 from PySide6.QtCore import (  # noqa: E402
     Qt, QObject, Signal, QTimer, QRectF, QPointF, QAbstractNativeEventFilter
 )
@@ -359,12 +379,11 @@ def register_hotkeys(overlay: "Overlay", app) -> "HotkeyFilter | None":
         # 0x4000 = MOD_NOREPEAT so holding the key fires once.
         if ctypes.windll.user32.RegisterHotKey(hwnd, hid, mods | 0x4000, vk):
             any_ok = True
-            sys.stderr.write(f"[halo-overlay] hotkey '{common.HOTKEYS[name]}' -> {name}\n")
+            _elog(f"[halo-overlay] hotkey '{common.HOTKEYS[name]}' -> {name}")
         else:
-            sys.stderr.write(
-                f"[halo-overlay] could not register hotkey '{common.HOTKEYS[name]}' "
-                f"for {name} (already in use?)\n")
-    return filt if any_ok else filt
+            _elog(f"[halo-overlay] could not register hotkey '{common.HOTKEYS[name]}' "
+                  f"for {name} (already in use?)")
+    return filt
 
 
 # --- tray --------------------------------------------------------------------
@@ -412,8 +431,8 @@ def main():
     try:
         server = start_http(bridge)
     except OSError as e:
-        sys.stderr.write(f"Halo overlay: cannot bind {common.OVERLAY_BASE}: {e}\n")
-        sys.stderr.write("Another overlay is probably already running.\n")
+        _elog(f"Halo overlay: cannot bind {common.OVERLAY_BASE}: {e}")
+        _elog("Another overlay is probably already running.")
         return 1
 
     app.aboutToQuit.connect(lambda: server.shutdown())

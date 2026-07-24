@@ -187,7 +187,7 @@ whatever's under it, and it auto-clears after 6s. Verified at 100% and 150% scal
 | **M3** | **Coordinate fidelity** (DPI per-monitor v2 both sides; image→physical scale handshake; verify accuracy) | Circle lands within ~10px of target at 100% & 150%, from a downscaled screenshot | ✅ (exact at **200%**, 3840×2160→1280 downscale) |
 | **M4** | **Dual-agent integration** (register in Claude Code + Codex; end-to-end "what do I click") | From BOTH Claude Code and Codex: ask → screenshot → correct red circle on screen | ✅ registered (`claude mcp list` → halo ✓ Connected; Codex block added). End-to-end needs a fresh agent session to load the tools. |
 | **M5** | **UX polish** (box + arrow shapes, multi-highlight, pulse animation, optional global hotkey to trigger a guidance turn, better labels) | Shapes/animation work; hotkey optional | ✅ box/arrow/circle + pulse + multi-highlight; on-screen label clamping; **global hotkeys** (clear/toggle) via RegisterHotKey; JPEG token optimization; all settings in `config/settings.json` |
-| **M6** | **Portfolio** (README + demo GIF, masternazz.com writeup, PyInstaller build of overlay) | `README.md` with GIF; one-file overlay exe runs without a dev env | ◑ README written; demo GIF + PyInstaller build pending |
+| **M6** | **Portfolio** (README + demo GIF, masternazz.com writeup, PyInstaller build of overlay) | `README.md` with GIF; one-file overlay exe runs without a dev env | ✅ README + `docs/demo.gif` (self-contained, reproducible via `docs/make_demo.py`); `build.py` → `dist/halo-overlay.exe` (windowed one-file), verified serving + drawing with no Python env |
 
 Ship M1–M4 first; that's the working product. M5/M6 are polish + resume value.
 
@@ -281,6 +281,20 @@ VS Code window or start a new chat; Codex: new session). Templates live in `conf
     that watches `WM_HOTKEY (0x0312)` — no `keyboard`/`pynput` dependency. Add `MOD_NOREPEAT`
     (0x4000). Keep a Python reference to the filter (stash on the app) or it gets GC'd. Configured
     in `config/settings.json` → `hotkeys` (default `ctrl+alt+h`=clear, `ctrl+alt+j`=toggle).
+18. **PyInstaller `--windowed` sets `sys.stderr`/`sys.stdout` to `None`.** A raw
+    `sys.stderr.write(...)` then throws `AttributeError` and silently kills startup (the process
+    lingers but never binds the port — maddening with no console). Route all diagnostics through
+    a guarded `_elog()` that no-ops when stderr is None and also appends to
+    `%TEMP%/halo-overlay.log` so windowed builds stay debuggable. Also: a one-file exe's **first**
+    launch unpacks ~48 MB to temp (+ AV scan), so allow ~5–20 s before health on the very first run.
+19. **Frozen settings path:** in a PyInstaller build `common.__file__` points inside `_MEIPASS`.
+    `load_settings()` checks `settings.json`/`config/settings.json` **next to the .exe** first
+    (so the packaged build is configurable without rebuilding), then the bundled `_MEIPASS` copy,
+    then the dev repo path. Bundle the default via `--add-data "config/settings.json;config"`.
+20. **Demo GIF without leaking a real screen:** the honest real-overlay captures contained private
+    content (Discord DMs), unfit for a public README. `docs/make_demo.py` renders a neutral mock UI
+    and reproduces the overlay's exact ring/glow/pulse/label styling in Pillow — reproducible, safe,
+    and it tells the "ask → circle appears" story in one loop.
 
 ---
 

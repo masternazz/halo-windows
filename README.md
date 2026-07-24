@@ -125,6 +125,22 @@ The agent screenshots, reasons, and Halo circles the button on your screen. Foll
 The overlay also exposes a plain HTTP API (`POST /circle /box /arrow /clear`, `GET /health`) on
 `127.0.0.1:7333` — see [`tests/test_overlay_curl.md`](tests/test_overlay_curl.md).
 
+## Standalone overlay (no Python needed)
+
+The overlay can run as a one-file Windows executable, so non-developers don't need a Python
+env. Grab `halo-overlay.exe` from the [Releases](https://github.com/masternazz/halo-windows/releases)
+page and run it — it listens on `127.0.0.1:7333` just like `python -m overlay`. Drop a
+`settings.json` next to the .exe to change hotkeys/colors/token budget.
+
+Build it yourself:
+```powershell
+pip install pyinstaller
+python build.py          # -> dist/halo-overlay.exe (~48 MB, windowed)
+```
+(The MCP server / CLI still run from the agent's Python env; they auto-launch whichever overlay
+they find — the .exe is just a dev-env-free alternative. First launch unpacks to temp, so it
+can take a few seconds; SmartScreen may warn on an unsigned exe.)
+
 ## Testing
 
 - Overlay smoke tests: [`tests/test_overlay_curl.md`](tests/test_overlay_curl.md)

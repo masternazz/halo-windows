@@ -10,9 +10,32 @@ from __future__ import annotations
 
 import json
 import os
+import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-SETTINGS_PATH = os.path.join(_HERE, "config", "settings.json")
+
+
+def _settings_candidates() -> list[str]:
+    """Where to look for settings.json, best override first.
+
+    Frozen (PyInstaller) exe: prefer a settings.json the user drops next to the .exe, so the
+    packaged build is configurable without rebuilding; fall back to the copy bundled inside.
+    Dev: the repo's config/settings.json.
+    """
+    paths = []
+    if getattr(sys, "frozen", False):
+        exe_dir = os.path.dirname(os.path.abspath(sys.executable))
+        paths += [os.path.join(exe_dir, "settings.json"),
+                  os.path.join(exe_dir, "config", "settings.json")]
+        meipass = getattr(sys, "_MEIPASS", None)
+        if meipass:
+            paths.append(os.path.join(meipass, "config", "settings.json"))
+    paths.append(os.path.join(_HERE, "config", "settings.json"))
+    return paths
+
+
+# First existing candidate (for reference/logging); may be None if only defaults apply.
+SETTINGS_PATH = next((p for p in _settings_candidates() if os.path.exists(p)), None)
 
 # Baked-in defaults. config/settings.json overrides any subset of these.
 DEFAULTS = {
@@ -37,13 +60,17 @@ def _deep_merge(base: dict, over: dict) -> dict:
 
 
 def load_settings() -> dict:
-    """Return DEFAULTS deep-merged with config/settings.json (if present and valid)."""
-    try:
-        with open(SETTINGS_PATH, encoding="utf-8") as f:
-            user = json.load(f)
-        return _deep_merge(DEFAULTS, user)
-    except (OSError, ValueError, json.JSONDecodeError):
-        return {k: dict(v) for k, v in DEFAULTS.items()}
+    """Return DEFAULTS deep-merged with the first settings.json found (if present and valid)."""
+    for path in _settings_candidates():
+        try:
+            with open(path, encoding="utf-8") as f:
+                user = json.load(f)
+            return _deep_merge(DEFAULTS, user)
+        except FileNotFoundError:
+            continue
+        except (OSError, ValueError, json.JSONDecodeError):
+            break
+    return {k: dict(v) for k, v in DEFAULTS.items()}
 
 
 SETTINGS = load_settings()
