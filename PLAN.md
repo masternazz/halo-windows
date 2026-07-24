@@ -295,6 +295,14 @@ VS Code window or start a new chat; Codex: new session). Templates live in `conf
     content (Discord DMs), unfit for a public README. `docs/make_demo.py` renders a neutral mock UI
     and reproduces the overlay's exact ring/glow/pulse/label styling in Pillow — reproducible, safe,
     and it tells the "ask → circle appears" story in one loop.
+21. **Performance (measured, don't optimize blind).** On a 4K primary: `take_screenshot` ≈ capture
+    58 ms + resize + JPEG 3 ms. The resize filter dominated — **LANCZOS 60 ms vs BOX 16 ms** at
+    equal text legibility for downscaling (LANCZOS can even ring on text), so both `mcp_server` and
+    `cli.py` use **BOX** → take_screenshot ~121→~92 ms. Overlay cold start is ~1.09 s and was the
+    worst felt lag on the first highlight, so `mcp_server` **pre-warms** the overlay in a daemon
+    thread at startup; with a normal agent-thinking gap the first highlight then measures ~6 ms
+    (vs ~1000 ms). `FastMCP` import (~1.15 s) dominates server startup but is inherent to the SDK.
+    Creating `mss.MSS()` per call vs persistent made no measurable difference (~0.1 ms).
 
 ---
 
